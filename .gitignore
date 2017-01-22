@@ -1,0 +1,12 @@
+platforms/
+plugins/
+.idea/
+
+Thumbs.db
+*.DS_Store
+
+*.bak
+*.cache
+*.log
+*.swp
+*.user

@@ -1,29 +1,51 @@
-# Framework7 PhoneGap Application 
+# BluL
+BluL is a BLE-Tools for Developers and Techies.
 
-> [Framework7](http://www.idangero.us/framework7) is a Mobile UI framework that can be used to build hybrid apps with PhoneGap. This template allows you to get started using Framework7 
-  quickly. 
-  
-  For a more extensive Framework7 sample, see the [one included in their Github project](https://github.com/nolimits4web/Framework7/tree/master/dist)
-  or the [demo apps on their website](http://www.idangero.us/framework7/apps/#.VpQCc5MrKjQ).
+It makes it possible to scan for BLE-Devices, connect with them, see the
+different available characteristics and services, read their values and
+even record all signals with notify function.
+
+## Discovery and Recording
+The startup layout is quite simple. on top there is the button to search for near BLE-Devices.
+All Devices will be added directly below showing the name, the mac-address and the rssi.
+
+### Menu
+You can access the menu either by swiping from the left boarder to the right or via the menu button on the upper left side.
     
-  Also, for an intro to Framework7, check out [this post on the PhoneGap blog](http://phonegap.com/blog/2015/11/30/framework7/).   
+### Device Details
+After pushing a device on the startscreen. In this view you can see different general information and a list of all available services.
+Each service includes the characteristic, the name and the properties (i.e. "Read", "Notify" ...)
+Click on a service to either read or write it.
 
+By clicking the floating round button on the lower left you get to the Record View.
 
-## Usage
+### Record View
+In this view you can select all notifiable services and start a recording those.
+By clicking the start-recording button you get to the graph-view
     
-### PhoneGap CLI
+### Graph View
+Here it is possible to see the the current recording of services. Here it is to be mentioned that there are only new values when the app is notified by the BLE-Device
 
-    $ phonegap create my-app --template phonegap-template-framework7
+## Saved Devices
+Over the menu you can reach the saved devices visible as the Name and MAC-Adress.
+It is possible to remove a saved device by swiping it to the left and clicking on "delete".
 
-### Cordova CLI
+### Saved Device Details
+You reach the details of a saved device by pushing it on the saved devices view.
+In here you see several general information about the device and all available services.
 
-    $ cordova create my-app --template phonegap-template-framework7
-    
-### Desktop
+It is also possible to adjust the config of all services of that device.
 
-In your browser, open the file:
+### Service Adjusting
+In the Service-View you can adjust a custom name, the unit, the formula to calculate the real value, and the format in which it is send.
+The formula uses javascript eval with 'x' as value.
 
-    /www/index.html
+## Recordings
+In the Recordings you can first see all saved devices. After a push you can see all recordings of this device.
+After choosing a recording you can see the same chart which from the original recording.
+You can remove a recording by swiping it into the left and clicking "delete".
+
+
 
 
   

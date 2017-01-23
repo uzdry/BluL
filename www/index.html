@@ -31,8 +31,12 @@
 
     <link rel="stylesheet" href="css/styles.css">
 
+    <script type="text/javascript" src="js/device-manager.js"></script>
     <script type="text/javascript" src="js/file-manager.js"></script>
     <script type="text/javascript" src="js/ble.js"></script>
+    <script type="text/javascript" src="js/recorder.js"></script>
+    <script type="text/javascript" src="lib/Chart.bundle.js"></script>
+    <script type="text/javascript" src="lib/moment.js"></script>
 
 </head>
 
@@ -59,6 +63,13 @@
                     <a href="#" class="saved-devices-link item-content list-panel-all close-panel item-link">
                         <div class="item-inner">
                             <div class="item-title">Devices</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="recordings-link item-content list-panel-all close-panel item-link">
+                        <div class="item-inner">
+                            <div class="item-title">Recordings</div>
                         </div>
                     </a>
                 </li>
@@ -101,6 +112,438 @@
             </div>
         </div>
     </div>
+
+
+    <!-- DEVICE DETAILS -->
+    <script type="text/template7" id="deviceView">
+        <div class="page" data-page="deviceView">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left sliding">
+                        <a href="#" class="back link"><i class="icon icon-back"></i></a>
+                    </div>
+                    <div class="center">{{name}}</div>
+                </div>
+            </div>
+            <a href="#" class="floating-button color-blue" onclick="recorder.showRecInitList({{stringify id}})">
+                <i class="fa fa-dot-circle-o" style="font-size: 2.5em;"></i>
+            </a>
+            <div class="page-content">
+                <div class="content-block-title">Device Details</div>
+                <div class="list-block media-list">
+                    <ul>
+                        <li class="item-content">
+                            <div clas="item-inner">
+                                <div class="item-title">Name:</div>
+                                <div class="item-after">{{name}}</div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div clas="item-inner">
+                                <div class="item-title">ID:</div>
+                                <div class="item-after">{{id}}</div>
+                            </div>
+                        </li>
+                        <li class="item-content">
+                            <div clas="item-inner">
+                                <div class="item-title">RSSI:</div>
+                                <div class="item-after">{{rssi}}dB</div>
+                            </div>
+                        </li>
+                        <li class="list-group-title">{{this.characteristics.length}} services found</li>
+                        {{#each characteristics}}
+                            <li>
+                                <a href="#" class="item-content" onclick="bleScanner.loadService({{stringify ../id}}, {{@index}});">
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">{{this.name}}</div>
+                                            <div class="item-after">{{this.service}}</div>
+                                        </div>
+                                        <div class="item-subtitle">{{this.properties}}</div>
+                                    </div>
+
+                                </a>
+                            </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Recording Init View -->
+    <script type="text/template7" id="recInitList">
+        <div class="page" data-page="recInitList">
+
+            <!-- Fixed navbar for Material theme -->
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left sliding">
+                        <a href="#" class="back link"><i class="icon icon-back"></i></a>
+                    </div>
+                    <div class="center">Record</div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="content-block-title">Recordable Services</div>
+                <div class="content-block">
+                    <p><a href="#" class="button" id="recordButton" onclick="recorder.startRecording()">Start recording</a></p>
+                </div>
+                <div class="list-block media-list">
+                    <form id="recorder-select-form" class="list-block">
+                        <ul>
+                            <li>
+                                <label class="label-checkbox item-content" onclick="$$('.checkbox-record').prop('checked', true);">
+                                    <input type="checkbox" >
+                                    <div class="item-media">
+                                        <i class="icon icon-form-checkbox"></i>
+                                    </div>
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">All</div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </li>
+                            {{#each characteristics}}
+                            <li>
+                                <label class="label-checkbox item-content">
+                                    <input class="checkbox-record" type="checkbox" name="{{this.characteristic}}&#124;{{this.service}}">
+                                    <div class="item-media"><i class="icon icon-form-checkbox"></i></div>
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">{{this.name}}</div>
+                                            <div class="item-after">{{this.service}}</div>
+                                        </div>
+                                        <div class="item-subtitle">{{this.unit}}</div>
+                                        <div class="item-text">{{this.characteristic}}</div>
+                                    </div>
+                                </label>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- Recording Graph ----->
+    <script type="text/template7" id="recordingGraph">
+
+        <div class="page" data-page="recordingGraph">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Recording Graph</div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="content-block">
+                    <canvas id="myChart" width="10%" height="10%"></canvas>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- SAVED DEVICE LIST ----->
+    <script type="text/template7" id="savedDevices">
+
+        <div class="page" data-page="savedDevices">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Saved Devices</div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="content-block-title">Saved Devices</div>
+                <div class="list-block media-list">
+                    <ul>
+                        {{#each devices}}
+                        <li class="swipeout">
+                            <div class="swipeout-content">
+                                <a href="#" class="item-content item-link" onclick="devMan.loadDevice({{stringify this.id}})">
+                                    <div class="item-inner">
+                                        <div class="item-title-row">
+                                            <div class="item-title">{{this.name}}</div>
+                                            <div class="item-after"></div>
+                                        </div>
+                                        <div class="item-subtitle">{{this.id}}</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="swipeout-actions-right">
+                                <a href="#" class="swipeout-delete" onclick="devMan.deleteSavedDevice({{stringify this.id}})">Delete</a>
+                            </div>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- SAVED DEVICE SERVICE LIST ----->
+    <script type="text/template7" id="savedDeviceServices">
+
+        <div class="page" data-page="savedDeviceServices">
+            <!-- Fixed navbar for Material theme -->
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Services of {{name}}</div>
+                </div>
+            </div>
+            <div class="page-content">
+                <div class="content-block"></div>
+                <div class="list-block media-list">
+                    <ul>
+                        <li class="list-group-title">General Information</li>
+                        <li>
+                            <a href="#" class="item-content item-link" id="prompt-name-change">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">Name: </div>
+                                        <div class="item-after">{{name}}</div>
+                                    </div>
+
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <div class="item-content">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">UUID: </div>
+                                        <div class="item-after">{{id}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-title">Services</li>
+                        {{#each characteristics}}
+                        <li>
+                            <a href="#" class="item-content item-link" onclick="devMan.changeService({{@index}})">
+                                <div class="item-inner">
+                                    <div class="item-title-row">
+                                        <div class="item-title">{{this.name}}</div>
+                                        <div class="item-after">Service ID:{{this.service}}</div>
+                                    </div>
+                                    <div class="item-subtitle">Characteristics ID: {{this.characteristic}}</div>
+                                    <div class="item-text">{{this.properties}}</div>
+                                </div>
+                            </a>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- SAVED DEVICE SERVICE LIST ----->
+    <script type="text/template7" id="savedDevServDetails">
+
+        <div class="page" data-page="savedDevServDetails">
+            <!-- Fixed navbar for Material theme -->
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Services of {{name}}</div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="content-block-title">Services of {{name}}</div>
+                <div class="list-block media-list">
+                    <form id="service-form" class="list-block">
+                        <ul>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Service ID</div>
+                                        <div class="item-after">{{service.service}}</div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Characteristic ID</div>
+                                        <div class="item-after">{{service.characteristic}}</div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Name</div>
+                                        <div class="item-input">
+                                            <input type="text" name="name" placeholder="name of service" value="{{service.name}}" onkeydown="devMan.serviceParamsChanged = true">
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Unit</div>
+                                        <div class="item-input">
+                                            <input type="text" name="unit" placeholder="unit" value="{{service.unit}}" onkeydown="devMan.serviceParamsChanged = true">
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Formula</div>
+                                        <div class="item-input">
+                                            <input type="text" name="formula" placeholder="formula" value="{{service.formula}}" onkeydown="devMan.serviceParamsChanged = true">
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item-inner">
+                                        <div class="item-title label">Format</div>
+                                        <div class="item-input">
+                                            <select name="format" onkeydown="devMan.serviceParamsChanged = true">
+                                                <option>uint8</option>
+                                                <option>int8</option>
+                                                <option>uint16</option>
+                                                <option>int16</option>
+                                                <option>uint32</option>
+                                                <option>int32</option>
+                                                <option>float32</option>
+                                                <option>float64</option>
+                                                <option>ASCII</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="item-content">
+                                    <div class="item inner">
+                                        <div class="item-title label">Available Services</div>
+                                        <div class="item-after">{{service.properties}}</div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- RECORDING LIST ----->
+    <script type="text/template7" id="recordingsDevices">
+
+        <div class="page" data-page="recordingsDevices">
+            <!-- Fixed navbar for Material theme -->
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Recording Devices</div>
+                </div>
+            </div>
+            <div class="page-content">
+                <div class="content-block"></div>
+                <div class="list-block media-list">
+                    <ul>
+                        {{#each devices}}
+                        <li>
+                            <a href="#" class="item-content item-link" onclick="recorder.listRecordings({{stringify this.id}})">
+                                <div class="item-inner">
+                                    <div class="item-title">{{this.name}}</div>
+                                    <div class="item-after">{{this.id}}</div>
+                                </div>
+                            </a>
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- RECORDING LIST ----->
+    <script type="text/template7" id="recordings">
+
+        <div class="page" data-page="recordings">
+            <!-- Fixed navbar for Material theme -->
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Recording Devices</div>
+                </div>
+            </div>
+            <div class="page-content">
+                <div class="content-block"></div>
+                <div class="list-block media-list">
+                    <ul>
+                        {{#each recordings}}
+                        {{#js_compare "this.name !== 'config.json'"}}
+                            <li class="swipeout">
+                                <div class="swipeout-content">
+                                    <a href="#" class="item-content item-link" onclick="recorder.showRecording({{@index}})">
+                                        <div class="item-inner">
+                                            <div class="item-title">{{this.name}}</div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="swipeout-actions-right">
+                                    <a href="#" class="swipeout-delete" onclick="recorder.deleteRecording({{@index}})">Delete</a>
+                                </div>
+                            </li>
+                        {{/js_compare}}
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!----- Recorded Graph ----->
+    <script type="text/template7" id="recordedGraph">
+
+        <div class="page" data-page="recordedGraph">
+            <div class="navbar">
+                <div class="navbar-inner">
+                    <div class="left">
+                        <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
+                    </div>
+                    <div class="center sliding">Recorded Graph</div>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="content-block">
+                    <canvas id="recordedChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </script>
+
 
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="lib/framework7/js/framework7.min.js"></script>

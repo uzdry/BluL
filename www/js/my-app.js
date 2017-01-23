@@ -1,12 +1,10 @@
 /****************************************
  *    Initialisation
  ****************************************/
+
 // Code for platform detection
 var isMaterial = Framework7.prototype.device.ios === false;
 var isIos = Framework7.prototype.device.ios === true;
-var bleScanner = new BLEScanner();
-var fman = new FileManager();
-
 
 // Add the above as global variables for templates
 Template7.global = {
@@ -16,6 +14,20 @@ Template7.global = {
 
 // If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
+
+
+
+
+// A stringify helper
+// Need to replace any double quotes in the data with the HTML char
+//  as it is being placed in the HTML attribute data-context
+function stringifyHelper(context) {
+    var str = JSON.stringify(context);
+    return str.replace(/"/g, '&quot;');
+}
+
+Template7.registerHelper('stringify', stringifyHelper);
+
 
 if (!isIos) {
     // Change class
@@ -37,6 +49,12 @@ var myApp = new Framework7({
     swipeout: true
 });
 
+// Other objects for usage
+var bleScanner = new BLEScanner();
+var fman = new FileManager();
+var recorder = new Recorder();
+var devMan = new DeviceManager();
+
 
 // Add view
 var mainView = myApp.addView('.view-main', {
@@ -46,13 +64,28 @@ var mainView = myApp.addView('.view-main', {
 
 });
 
-
-
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("Device is ready!");
 
     //TODO file reading with saved devices
     fman.readConfigs();
+
 });
+
+
+// Load the discovery-view
+$$(document).on('click', '.panel .discover-link', function discoverLink() {
+    // Only change route if not already on the index
+    //  It would be nice to have a better way of knowing this...
+    var indexPage = $$('.page[data-page=index]');
+    if (indexPage.hasClass('cached')) {
+        mainView.router.load({
+            pageName: 'index',
+            animatePages: false,
+            reload: true
+        });
+    }
+});
+
 

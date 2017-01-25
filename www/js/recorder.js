@@ -323,7 +323,9 @@ function Recorder(){
 
             var index = indizes[val.service + val.characteristic];
 
-            this.graph.data.datasets[index].data.push({x: val.time, y:val.value});
+            var calculated = bleScanner.calculate(val.characteristic, val.value);
+
+            this.graph.data.datasets[index].data.push({x: val.time, y:calculated});
         }
         this.graph.update();
 

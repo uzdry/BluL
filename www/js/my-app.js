@@ -26,7 +26,13 @@ function stringifyHelper(context) {
     return str.replace(/"/g, '&quot;');
 }
 
+function limitLength(context){
+    if(context.length > 10) context = context.substring(0,6);
+    return context;
+}
+
 Template7.registerHelper('stringify', stringifyHelper);
+Template7.registerHelper('limit', limitLength);
 
 
 if (!isIos) {

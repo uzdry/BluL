@@ -50,10 +50,12 @@ function DeviceManager(){
         });
     };
 
-    myApp.onPageBack("savedDevServDetails", function(page){
+    myApp.onPageInit("savedDevServDetails", function(page){
+        var format = page.context.service.format;
+        $$("#formatChooser").val(format);
+    });
 
-        console.log("hi");
-        console.log(this.serviceParamsChanged);
+    myApp.onPageBack("savedDevServDetails", function(page){
 
         // Check if the data has been changed
         if(!this.serviceParamsChanged) return;

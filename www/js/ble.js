@@ -40,13 +40,23 @@ function BLEScanner() {
         myApp.showPreloader('Connecting..');
 
         ble.connect(id, function (device) {
+            var nDevice;
 
-            var nDevice = this.addJsonInformation(device);
+            if (fman.devices[id]){
+
+                console.log("KNOWN DEVICE");
+                nDevice = fman.devices[id];
+                nDevice['rssi'] = device.rssi;
+
+            } else {
+
+                nDevice = this.addJsonInformation(device);
+                fman.saveDevice(nDevice);
+
+            }
 
             this.connectedDevices[nDevice.id] = nDevice;
 
-            if (fman.devices[id]) console.log("KNOWN DEVICE");
-            fman.saveDevice(nDevice);
             console.log("connected to: " + nDevice.id);
 
             mainView.router.load({
@@ -64,9 +74,9 @@ function BLEScanner() {
 
             if (device.id == connecting) {
                 myApp.hidePreloader();
-                myApp.alert("Connection to " + device.id + " failed");
+                myApp.alert("Connection to " + device.id + " failed", device.name);
             } else {
-                myApp.alert("Device " + device.id + " disconnected");
+                myApp.alert("Device " + device.id + " disconnected", device.name);
             }
 
         }.bind(this));
@@ -91,12 +101,12 @@ function BLEScanner() {
             "</a>" +
             "</li>";
 
-    }
+    };
 
     this.addJsonInformation = function (device) {
         var newDevice = device;
         for (var i = 0; i < newDevice.characteristics.length; i++) {
-            newDevice.characteristics[i]['name'] = newDevice.characteristics[i].characteristic;
+            newDevice.characteristics[i]['name'] = limitLength(newDevice.characteristics[i].characteristic);
             newDevice.characteristics[i]['unit'] = '';
             newDevice.characteristics[i]['format'] = 'uint8';
             newDevice.characteristics[i]['formula'] = 'x';
@@ -115,7 +125,7 @@ function BLEScanner() {
 
                 var value = this.rawToValue(char, data);
                 value = this.calculate(char, value);
-                myApp.alert(value + "");
+                myApp.alert(value + "" + char.unit, char.name);
 
             }.bind(this));
 

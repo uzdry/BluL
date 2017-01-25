@@ -100,7 +100,6 @@
 
                         <div class="content-block">
                             <p><a href="#" class="button" id="scanButton" onclick="bleScanner.startScanning()">Scan for Devices</a></p>
-                            <link rel="import" href="about.html">
 
                         </div>
                         <div class="list-block">
@@ -150,14 +149,14 @@
                                 <div class="item-after">{{rssi}}dB</div>
                             </div>
                         </li>
-                        <li class="list-group-title">{{this.characteristics.length}} services found</li>
+                        <li class="list-group-title">{{this.characteristics.length}} characteristics found</li>
                         {{#each characteristics}}
                             <li>
                                 <a href="#" class="item-content" onclick="bleScanner.loadService({{stringify ../id}}, {{@index}});">
                                     <div class="item-inner">
                                         <div class="item-title-row">
                                             <div class="item-title">{{this.name}}</div>
-                                            <div class="item-after">{{this.service}}</div>
+                                            <div class="item-after">CharID: {{limit this.characteristic}}</div>
                                         </div>
                                         <div class="item-subtitle">{{this.properties}}</div>
                                     </div>
@@ -214,10 +213,10 @@
                                     <div class="item-inner">
                                         <div class="item-title-row">
                                             <div class="item-title">{{this.name}}</div>
-                                            <div class="item-after">{{this.service}}</div>
+                                            <div class="item-after">ServiceID: {{limit this.service}}</div>
                                         </div>
-                                        <div class="item-subtitle">{{this.unit}}</div>
-                                        <div class="item-text">{{this.characteristic}}</div>
+                                        <div class="item-subtitle">Unit: {{this.unit}}</div>
+                                        <div class="item-text">CharID: {{limit this.characteristic}}</div>
                                     </div>
                                 </label>
                             </li>
@@ -337,9 +336,9 @@
                                 <div class="item-inner">
                                     <div class="item-title-row">
                                         <div class="item-title">{{this.name}}</div>
-                                        <div class="item-after">Service ID:{{this.service}}</div>
+                                        <div class="item-after">Service ID:{{limit this.service}}</div>
                                     </div>
-                                    <div class="item-subtitle">Characteristics ID: {{this.characteristic}}</div>
+                                    <div class="item-subtitle">Characteristics ID: {{limit this.characteristic}}</div>
                                     <div class="item-text">{{this.properties}}</div>
                                 </div>
                             </a>
@@ -361,7 +360,7 @@
                     <div class="left">
                         <a href="#" class="link icon-only open-panel"><i class="fa fa-bars"></i></a>
                     </div>
-                    <div class="center sliding">Services of {{name}}</div>
+                    <div class="center sliding">Services of {{#if name}}{{name}}{{else}}{{id}}{{/if}}</div>
                 </div>
             </div>
 
@@ -421,16 +420,16 @@
                                     <div class="item-inner">
                                         <div class="item-title label">Format</div>
                                         <div class="item-input">
-                                            <select name="format" onkeydown="devMan.serviceParamsChanged = true">
-                                                <option>uint8</option>
-                                                <option>int8</option>
-                                                <option>uint16</option>
-                                                <option>int16</option>
-                                                <option>uint32</option>
-                                                <option>int32</option>
-                                                <option>float32</option>
-                                                <option>float64</option>
-                                                <option>ASCII</option>
+                                            <select name="format" onkeydown="devMan.serviceParamsChanged = true" id="formatChooser">
+                                                <option value="uint8">uint8</option>
+                                                <option value="int8">int8</option>
+                                                <option value="uint16">uint16</option>
+                                                <option value="int16">int16</option>
+                                                <option value="uint32">uint32</option>
+                                                <option value="int32">int32</option>
+                                                <option value="float32">float32</option>
+                                                <option value="float64">float64</option>
+                                                <option value="ASCII">ASCII</option>
                                             </select>
                                         </div>
                                     </div>

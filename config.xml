@@ -52,5 +52,5 @@
     <plugin name="cordova-plugin-file" spec="~4.3.1" />
     <plugin name="cordova-plugin-splashscreen" spec="~4.0.1" />
     <preference name="FadeSplashScreenDuration" value="300" />
-
+    <engine name="android" spec="~6.0.0" />
 </widget>
